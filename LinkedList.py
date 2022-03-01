@@ -2,9 +2,16 @@ from Node import *
 
 class LinkedList:
     def __init__(self, r=None):
-        # 2022/02/24 changement de representation liste vide !
-        # entraine modification non encore effectuées!
-        self.__root = r
+        if isinstance(r, LinkedList):
+            p = r.__root
+            while p!=None:
+                self.add_last(Node(p.getData(),None)) 
+                # ajouter à la fin de self un noeud qui ressemble au noeud courrant de r
+                p = p.getNextNode()
+        elif isinstance(r, Node):
+            self.__root = Node(r.getData(), None)
+        else:
+            self.__root = r
 
     def add_first(self, d):
         n = Node(d, None) if not isinstance(d, Node) else d
@@ -13,6 +20,9 @@ class LinkedList:
         return self
 
     def add_last(self, d):
+        if self.isEmpty():
+            self.__root = Node(d, None) if not isinstance(d, Node) else d
+            return self
         p = self.__root
         while isinstance(p.getNextNode(), Node):
             p = p.getNextNode()
@@ -83,3 +93,66 @@ class LinkedList:
             p = p.getNextNode()
         return p
     
+    def __len__(self):
+        compt=0
+        p=self.__root
+        while p!=None:
+            compt+=1
+            p = p.getNextNode()
+        return compt
+
+    def ajouter(self, L):
+        if self.isEmpty(): 
+            self = L # copie profonde !
+            return self 
+        elif L.isEmpty(): return self
+        p = self.__root
+        q = L.__root
+        # parcourir la plus courte
+        while p!=None and q!=None:
+            p.setData(p.getData()+q.getData())
+            p = p.getNextNode()
+            q = q.getNextNode()
+        # si elles ont la même taille
+        # ou si self est plus longue
+        if q==None or (q==None and p==None):
+            return self
+        # cas restant est L est plus longue que self
+        while q!=None:
+            self.add_last(Node(q.getData(), None)) # copie profonde
+            q = q.getNextNode()
+        return self
+
+    def somme(self, L):
+        if self.isEmpty(): 
+            #self = L # copie profonde !
+            return LinkedList(L) 
+        elif L.isEmpty(): return LinkedList(self)
+        p = self.__root
+        q = L.__root
+        som = LinkedList()
+        # parcourir la plus courte
+        while p!=None and q!=None:
+            som.add_last(Node(p.getData()+q.getData(), None))
+            p = p.getNextNode()
+            q = q.getNextNode()
+        p = q if (q!=None and p==None) else p
+        while p!=None:
+            som.add_last(Node(p.getData(), None))
+            p = p.getNextNode()
+        return som
+
+    def __add__(self, l):
+        return self.somme(l)
+    
+    def __iter__(self):
+        self.current = self.__root
+        return self
+
+    def __next__(self):
+        x = self.current
+        if x!=None:
+            self.current = self.current.getNextNode()
+            return  x
+        else:
+            raise StopIteration
